@@ -752,6 +752,14 @@ plot(Points ~ Wonderlic, data = qb_and_wonder_score,
      main = "Fantasy Points vs. Wonderlic Scores for QBs",
      ylab = "Rookie Fantasy Points")
 abline(fantasy_wonderlic, col = "red")
+legend("topright",
+       legend = paste("Fantasy Points = ",
+                      round(fantasy_wonderlic$coefficients[1], 2),
+                      " - ",
+                      round(abs(fantasy_wonderlic$coefficients[2]), 3),
+                      "(Wonderlic)", sep = ""),
+       col = "red", lty = 1,
+       cex = 0.6)
 summary(fantasy_wonderlic)
 ```
 
