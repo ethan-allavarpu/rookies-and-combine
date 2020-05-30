@@ -256,6 +256,7 @@ plot(Points ~ X40YD, data = qb_rel_vars,
      xlab = "Forty Yard Dash Time (s)",
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[1],
+     cex.lab = 1.25,
      las = 1)
 plot(0:10, 0:10, type = "n",
      xaxt = "n", yaxt = "n",
@@ -266,21 +267,25 @@ plot(Points ~ Vertical, data = qb_rel_vars,
      xlab = "Vertical (in)",
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[2],
+     cex.lab = 1.25,
      las = 1)
 plot(Points ~ Broad.Jump, data = qb_rel_vars,
      xlab = "Broad Jump (in)",
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[3],
+     cex.lab = 1.25,
      las = 1)
 plot(Points ~ X3Cone, data = qb_rel_vars,
      xlab = "Three Cone Drill (s)",
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[4],
+     cex.lab = 1.25,
      las = 1)
 plot(Points ~ Shuttle, data = qb_rel_vars,
      xlab = "Shuttle (s)",
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[5],
+     cex.lab = 1.25,
      las = 1)
 
 with(qb_rel_vars, cor(X40YD, Points, use = "complete.obs"))
