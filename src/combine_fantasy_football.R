@@ -1,23 +1,6 @@
----
-title: "The NFL Combine and Fantasy Football"
-author:
-- "Ethan Allavarpu"
-- "Kyle Boal"
-date: "4/10/2020"
-output:
-  pdf_document:
-    toc: true
-    toc_depth: 4
-    number_sections: true
-    df_print: kable
-  self-contained: true
----
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, comment = NA)
 library(knitr)
 library(MASS)
-library(alr3)
+library(alr4)
 library(leaps)
 library(dplyr)
 color_scheme <- c(rgb(0, 0, 0, alpha = 0.25),
@@ -26,34 +9,30 @@ color_scheme <- c(rgb(0, 0, 0, alpha = 0.25),
                   rgb(0, 0, 0.5, alpha = 0.25),
                   rgb(0.5, 0, 0.5, alpha = 0.25),
                   rgb(0, 0.5, 0.5, alpha = 0.25))
-```
 
 # Data Gathering and Cleaning
 
 ## Download the Data
-```{r setup_code}
-qb_combine_1 <- read.csv("2000QBcombine.csv", stringsAsFactors = FALSE)
-qb_combine_2 <- read.csv("2010QBcombine.csv", stringsAsFactors = FALSE)
+qb_combine_1 <- read.csv("../data/2000QBcombine.csv", stringsAsFactors = FALSE)
+qb_combine_2 <- read.csv("../data/2010QBcombine.csv", stringsAsFactors = FALSE)
 qb_combine <- rbind(qb_combine_1, qb_combine_2)
 
-rb_combine_1 <- read.csv("2000RBcombine.csv", stringsAsFactors = FALSE)
-rb_combine_2 <- read.csv("2008RBcombine.csv", stringsAsFactors = FALSE)
-rb_combine_3 <- read.csv("2014RBcombine.csv", stringsAsFactors = FALSE)
+rb_combine_1 <- read.csv("../data/2000RBcombine.csv", stringsAsFactors = FALSE)
+rb_combine_2 <- read.csv("../data/2008RBcombine.csv", stringsAsFactors = FALSE)
+rb_combine_3 <- read.csv("../data/2014RBcombine.csv", stringsAsFactors = FALSE)
 rb_combine <- rbind(rb_combine_1, rb_combine_2, rb_combine_3)
 
-wr_combine_1 <- read.csv("2000WRcombine.csv", stringsAsFactors = FALSE)
-wr_combine_2 <- read.csv("2005WRCombine.csv", stringsAsFactors = FALSE)
-wr_combine_3 <- read.csv("2010WRCombine.csv", stringsAsFactors = FALSE)
-wr_combine_4 <- read.csv("2014WRcombine.csv", stringsAsFactors = FALSE)
+wr_combine_1 <- read.csv("../data/2000WRcombine.csv", stringsAsFactors = FALSE)
+wr_combine_2 <- read.csv("../data/2005WRCombine.csv", stringsAsFactors = FALSE)
+wr_combine_3 <- read.csv("../data/2010WRCombine.csv", stringsAsFactors = FALSE)
+wr_combine_4 <- read.csv("../data/2014WRcombine.csv", stringsAsFactors = FALSE)
 wr_combine <- rbind(wr_combine_1, wr_combine_2, wr_combine_3, wr_combine_4)
 
-te_combine_1 <- read.csv("2000TEcombine.csv", stringsAsFactors = FALSE)
-te_combine_2 <- read.csv("2011TEcombine.csv", stringsAsFactors = FALSE)
+te_combine_1 <- read.csv("../data/2000TEcombine.csv", stringsAsFactors = FALSE)
+te_combine_2 <- read.csv("../data/2011TEcombine.csv", stringsAsFactors = FALSE)
 te_combine <- rbind(te_combine_1, te_combine_2)
-```
 
 ## Write Helper Functions
-```{r}
 clean_players <- function(fantasy) {
   players <- as.character(fantasy$Player)
   players <- strsplit(players, "[*+]")
@@ -78,7 +57,7 @@ combine_and_football <- function(fantasy_year, position) {
   }
   pos <- data.frame()
   for (i in fantasy_year) {
-    fantasy <- read.csv(paste(i,"fantasy.csv", sep = ""),
+    fantasy <- read.csv(paste("../data/", i,"fantasy.csv", sep = ""),
                         stringsAsFactors = FALSE)
     combine_specific <- combine %>% filter(Year == i)
     fantasy$Player <- clean_players(fantasy)
@@ -93,11 +72,9 @@ combine_and_football <- function(fantasy_year, position) {
   }
   pos
 }
-```
 
 ## Create the Necesssary Data Frames
 ### Years and Positions that Abide by the Function
-```{r totals_pt_1}
 qbs <- combine_and_football(2000:2019, "qb")
 
 rbs_1 <- combine_and_football(2000:2001, "rb")
@@ -109,14 +86,12 @@ wrs_2 <- combine_and_football(2008:2009, "wr")
 wrs_3 <- combine_and_football(2011:2019, "wr")
 
 tes <- combine_and_football(2000:2019, "te")
-```
 
 ### Years and Positions that are Outliers
-```{r rb_2002}
 position <- "RB"
 i <- 2002
 combine <- rb_combine
-fantasy <- read.csv(paste(i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
+fantasy <- read.csv(paste("../data/", i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
 combine_specific <- combine %>% filter(Year == i)
 fantasy$Player <- clean_players(fantasy)
 rookie <- fantasy[fantasy$Player %in% combine_specific$Player, ] %>%
@@ -127,13 +102,11 @@ relevant <- combine_specific[as.character(combine_specific$Player) %in%
 relevant <- relevant[order(relevant$Player), ]
 rookie <- rookie[-11, ]
 rbs_2002 <- cbind(relevant, "Games" = rookie$G, "Points" = rookie$FantPt.)
-```
 
-```{r rb_2007}
 position <- "RB"
 i <- 2007
 combine <- rb_combine
-fantasy <- read.csv(paste(i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
+fantasy <- read.csv(paste("../data/", i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
 combine_specific <- combine %>% filter(Year == i)
 fantasy$Player <- clean_players(fantasy)
 rookie <- fantasy[fantasy$Player %in% combine_specific$Player, ] %>%
@@ -144,13 +117,11 @@ relevant <- combine_specific[as.character(combine_specific$Player) %in%
 relevant <- relevant[order(relevant$Player), ]
 rookie <- rookie[-2, ]
 rbs_2007 <- cbind(relevant, "Games" = rookie$G, "Points" = rookie$FantPt.)
-```
 
-```{r wr_2007}
 position <- "WR"
 i <- 2007
 combine <- wr_combine
-fantasy <- read.csv(paste(i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
+fantasy <- read.csv(paste("../data/", i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
 combine_specific <- combine %>% filter(Year == i)
 fantasy$Player <- clean_players(fantasy)
 rookie <- fantasy[fantasy$Player %in% combine_specific$Player, ] %>%
@@ -161,13 +132,11 @@ relevant <- combine_specific[as.character(combine_specific$Player) %in%
 relevant <- relevant[order(relevant$Player), ]
 rookie <- rookie[-c(5, 17), ]
 wrs_2007 <- cbind(relevant, "Games" = rookie$G, "Points" = rookie$FantPt.)
-```
 
-```{r wr_2010}
 position <- "WR"
 i <- 2010
 combine <- wr_combine
-fantasy <- read.csv(paste(i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
+fantasy <- read.csv(paste("../data/", i,"fantasy.csv", sep = ""), stringsAsFactors = FALSE)
 combine_specific <- combine %>% filter(Year == i)
 fantasy$Player <- clean_players(fantasy)
 rookie <- fantasy[fantasy$Player %in% combine_specific$Player, ] %>%
@@ -177,23 +146,17 @@ relevant <- combine_specific[as.character(combine_specific$Player) %in% rookie$P
 relevant <- relevant[order(relevant$Player), ]
 rookie <- rookie[-25, ]
 wrs_2010 <- cbind(relevant, "Games" = rookie$G, "Points" = rookie$FantPt.)
-```
 
-```{r total_2}
 rbs <- rbind(rbs_1, rbs_2002, rbs_2, rbs_2007, rbs_3)
 wrs <- rbind(wrs_1, wrs_2007, wrs_2, wrs_2010, wrs_3)
-```
 
 ## Subset the Proper Variables
-```{r data_display}
 qbs <- qbs %>% dplyr::select(Year:Pos, X40YD:Shuttle, Games:Points)
 rbs <- rbs %>% dplyr::select(Year:Pos, X40YD:Shuttle, Games:Points)
 wrs <- wrs %>% dplyr::select(Year:Pos, X40YD:Shuttle, Games:Points)
 tes <- tes %>% dplyr::select(Year:Pos, X40YD:Shuttle, Games:Points)
-```
 
 ## Remove Combine Non-Participants
-```{r na_removals}
 no_combine <- function(position) {
   combine_stats <- position %>% dplyr::select(X40YD:Shuttle)
   any_combine <- apply(combine_stats, 1, is.na)
@@ -219,38 +182,34 @@ wrs <- wrs[!is.na(wrs$Points), ]
 no_combine(tes)
 tes <- tes[tes$Player != no_combine(tes), ]
 tes <- tes[!is.na(tes$Points), ]
-```
 
 ## Eight Game Minimum
-```{r}
 qbs <- qbs %>% filter(Games >= 8) %>% filter(Points >= 10)
 rbs <- rbs %>% filter(Games >= 8) %>% filter(Points >= 10)
 wrs <- wrs %>% filter(Games >= 8) %>% filter(Points >= 10)
 tes <- tes %>% filter(Games >= 8) %>% filter(Points >= 10)
-```
 
 # Data Analysis
 
-*Note: When determining analysis on the combine events, before simply fitting a model to* ***everything****, we first only consider the events in which* ***at least 60% of the participants at that position*** *partook in the event during the combine.*
-
+# Note: When determining analysis on the combine events, before simply fitting a
+## model to everything, we first only consider the events in which at least 60%
+## of the participants at that position partook in the event during the combine.
+  
 ## Helper Function
-```{r}
 total_nas <- function(position) {
   na_chart <- lapply(position, is.na)
   vapply(na_chart, sum, numeric(1))
 }
-```
 
 ## The Quarterback
-```{r qb1}
 nrow(qbs)
 total_nas(qbs)
 total_nas(qbs) / nrow(qbs)
 names(qbs)[total_nas(qbs) / nrow(qbs) >= 0.4]
 qb_rel_vars <- qbs %>% dplyr::select(Player,
-                              X40YD:Vertical,
-                              Broad.Jump:Shuttle,
-                              Points)
+                                     X40YD:Vertical,
+                                     Broad.Jump:Shuttle,
+                                     Points)
 par(mfrow = c(2, 3))
 plot(Points ~ X40YD, data = qb_rel_vars,
      xlab = "Forty Yard Dash Time (s)",
@@ -293,10 +252,8 @@ with(qb_rel_vars, cor(Vertical, Points, use = "complete.obs"))
 with(qb_rel_vars, cor(Broad.Jump, Points, use = "complete.obs"))
 with(qb_rel_vars, cor(X3Cone, Points, use = "complete.obs"))
 with(qb_rel_vars, cor(Shuttle, Points, use = "complete.obs"))
-```
 
 ### A Model
-```{r, fig.height=7}
 qb_model <- lm(Points ~ . - Player, data = qb_rel_vars)
 par(mfrow = c(2, 2))
 plot(qb_model,
@@ -304,10 +261,8 @@ plot(qb_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(qb_model)
-```
 
 ### A Transformation
-```{r, fig.height=7}
 summary(powerTransform(Points ~ . - Player, data = qb_rel_vars))
 summary(powerTransform(cbind(X40YD, Vertical, Broad.Jump,
                              X3Cone, Shuttle) ~ 1,
@@ -321,10 +276,8 @@ plot(qb_transformed_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(qb_transformed_model)
-```
 
 ### Model Selection
-```{r, fig.height=7}
 qb_best_subsets <- regsubsets(New_Points ~ . - Points - Player,
                               data = qb_relevant_transformed,
                               nvmax = 5)
@@ -338,17 +291,15 @@ plot(final_qb_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(final_qb_model)
-```
 
 ## The Running Back
-```{r rb1, fig.height = 7}
 nrow(rbs)
 total_nas(rbs)
 total_nas(rbs) / nrow(rbs)
 names(rbs)[total_nas(rbs) / nrow(rbs) >= 0.4]
 rb_rel_vars <- rbs %>% dplyr::select(Player,
-                              X40YD:Broad.Jump,
-                              Points)
+                                     X40YD:Broad.Jump,
+                                     Points)
 par(mfrow = c(2, 2))
 plot(Points ~ X40YD, data = rb_rel_vars,
      ylab = "Fantasy Points",
@@ -362,10 +313,8 @@ plot(Points ~ BenchReps, data = rb_rel_vars,
 plot(Points ~ Broad.Jump, data = rb_rel_vars,
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[4])
-```
 
 ### A Model
-```{r, fig.height=7}
 rb_model <- lm(Points ~ . - Player, data = rb_rel_vars)
 par(mfrow = c(2, 2))
 plot(rb_model,
@@ -374,10 +323,8 @@ plot(rb_model,
      add.smooth = FALSE)
 summary(rb_model)
 mmps(rb_model)
-```
 
 ### A Transformation
-```{r, fig.height=7}
 summary(powerTransform(Points ~ . - Player, data = rb_rel_vars))
 summary(powerTransform(cbind(X40YD, Vertical,
                              BenchReps, Broad.Jump) ~ 1,
@@ -391,10 +338,8 @@ plot(rb_transformed_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(rb_transformed_model)
-```
 
 ### Model Selection
-```{r, fig.height=7}
 rb_best_subsets <- regsubsets(New_Points ~ . - Points - Player,
                               data = rb_relevant_transformed,
                               nvmax = 4)
@@ -407,18 +352,16 @@ plot(final_rb_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(final_rb_model)
-```
 
 ## The Wide Receiver
-```{r wr1, fig.height = 7}
 nrow(wrs)
 total_nas(wrs)
 total_nas(wrs) / nrow(wrs)
 names(wrs)[total_nas(wrs) / nrow(wrs) >= 0.4]
 wr_rel_vars <- wrs %>% dplyr::select(Player,
-                              X40YD:Vertical,
-                              Broad.Jump:Shuttle,
-                              Points)
+                                     X40YD:Vertical,
+                                     Broad.Jump:Shuttle,
+                                     Points)
 par(mfrow = c(2, 2))
 plot(Points ~ X40YD, data = wr_rel_vars,
      ylab = "Fantasy Points",
@@ -435,10 +378,8 @@ plot(Points ~ X3Cone, data = wr_rel_vars,
 plot(Points ~ Shuttle, data = wr_rel_vars,
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[5])
-```
 
 ### A Model
-```{r, fig.height=7}
 wr_model <- lm(Points ~ . - Player, data = wr_rel_vars)
 par(mfrow = c(2, 2))
 plot(wr_model,
@@ -447,10 +388,8 @@ plot(wr_model,
      add.smooth = FALSE)
 summary(wr_model)
 mmps(wr_model)
-```
 
 ### A Transformation
-```{r, fig.height=7}
 summary(powerTransform(Points ~ . - Player, data = wr_rel_vars))
 summary(powerTransform(cbind(X40YD, Vertical, Broad.Jump,
                              X3Cone, Shuttle) ~ 1,
@@ -464,10 +403,8 @@ plot(wr_transformed_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(wr_transformed_model)
-```
 
 ### Model Selection
-```{r, fig.height=7}
 wr_best_subsets <- regsubsets(New_Points ~ . - Points - Player,
                               data = wr_relevant_transformed,
                               nvmax = 5)
@@ -485,17 +422,15 @@ plot(New_Points ~ Shuttle, data = wr_relevant_transformed,
      pch = 19,
      col = rgb(0, 0, 0, alpha = 0.25))
 abline(final_wr_model, col = "red")
-```
 
 ## The Tight End
-```{r te1, fig.height = 7}
 nrow(tes)
 total_nas(tes)
 total_nas(tes) / nrow(tes)
 names(tes)[total_nas(tes) / nrow(tes) >= 0.4]
 te_rel_vars <- tes %>% dplyr::select(Player,
-                              X40YD:Shuttle,
-                              Points)
+                                     X40YD:Shuttle,
+                                     Points)
 par(mfrow = c(2, 3))
 plot(Points ~ X40YD, data = te_rel_vars,
      ylab = "Fantasy Points",
@@ -515,10 +450,8 @@ plot(Points ~ X3Cone, data = te_rel_vars,
 plot(Points ~ Shuttle, data = te_rel_vars,
      ylab = "Fantasy Points",
      pch = 19, col = color_scheme[6])
-```
 
 ### A Model
-```{r, fig.height=7}
 te_model <- lm(Points ~ . - Player, data = te_rel_vars)
 par(mfrow = c(2, 2))
 plot(te_model,
@@ -527,10 +460,8 @@ plot(te_model,
      add.smooth = FALSE)
 summary(te_model)
 mmps(te_model)
-```
 
 ### A Transformation
-```{r, fig.height=7}
 summary(powerTransform(Points ~ . - Player, data = te_rel_vars))
 summary(powerTransform(cbind(X40YD, Vertical, BenchReps,
                              Broad.Jump, X3Cone, Shuttle) ~ 1,
@@ -546,10 +477,8 @@ plot(te_transformed_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(te_transformed_model)
-```
 
 ### Model Selection
-```{r, fig.height=7}
 te_best_subsets <- regsubsets(New_Points ~ . - Points - X3Cone - Broad.Jump - Player,
                               data = te_relevant_transformed,
                               nvmax = 6)
@@ -563,48 +492,30 @@ plot(final_te_model,
      col = rgb(0, 0, 0, alpha = 0.25),
      add.smooth = FALSE)
 summary(final_te_model)
-```
 
 # Final Models
 ## Quarterback
-```{r}
 summary(final_qb_model)
-```
 
-$$\hat{log(Fantasy \space Points)} = -5.856 + 0.02(Broad \space Jump) + 1.98 (Shuttle)$$
-
-
+  
 ## Running Back
-```{r}
 summary(final_rb_model)
-```
-
-$$\hat{log(Fantasy \space Points)} = 3.95 + 0.0246(Broad \space Jump) - 0.606(Forty \space Yard \space Time)$$
 
 ## Wide Receiver
-```{r}
 summary(final_wr_model)
-```
 
-$$\hat{log(Fantasy \space Points)} = 0.66 + 0.76(Shuttle \space Time)$$
-
-
+  
 ## Tight End
-```{r}
 summary(final_te_model)
-```
-$$\hat{(Fantasy \space Points)^{\frac{1}{3}}} = 11.28 - 1.48(Forty \space Yard \space Time) -0.03(Vertical)$$
 
 # How Good Are These Rookies?
 ## Quarterbacks
-```{r}
 rookie_qb <- qbs %>% summarise(meanFPts = mean(Points)) %>% as.numeric
 rookie_qb
 rookie_qb / 16
 with(qbs, tapply(Points, Year, mean))
-```
+
 ### Change Over Time
-```{r}
 ppy <- with(qbs, tapply(Points, Year, mean))
 year <- 2001:2019
 plot(ppy ~ year,
@@ -615,19 +526,15 @@ plot(ppy ~ year,
 qb_yr_lm <- lm(ppy ~ year)
 summary(qb_yr_lm)
 abline(qb_yr_lm, col = "red")
-```
 
 
 ## Running Backs
-```{r}
 rookie_rb <- rbs %>% summarise(meanFPts = mean(Points)) %>% as.numeric
 rookie_rb
 rookie_rb / 16
 with(rbs, tapply(Points, Year, mean))
-```
 
 ### Change Over Time
-```{r}
 ppy <- with(rbs, tapply(Points, Year, mean))
 year <- 2000:2019
 plot(ppy ~ year,
@@ -638,18 +545,14 @@ plot(ppy ~ year,
 rb_yr_lm <- lm(ppy ~ year)
 summary(rb_yr_lm)
 abline(rb_yr_lm, col = "dark green")
-```
 
 ## Wide Receivers
-```{r}
 rookie_wr <- wrs %>% summarise(meanFPts = mean(Points)) %>% as.numeric
 rookie_wr
 rookie_wr / 16
 with(wrs, tapply(Points, Year, mean))
-```
 
 ### Change Over Time
-```{r}
 ppy <- with(wrs, tapply(Points, Year, mean))
 year <- 2000:2019
 plot(ppy ~ year,
@@ -660,18 +563,14 @@ plot(ppy ~ year,
 wr_yr_lm <- lm(ppy ~ year)
 summary(wr_yr_lm)
 abline(wr_yr_lm, col = "dark blue")
-```
 
 ## Tight Ends
-```{r}
 rookie_te <- tes %>% summarise(meanFPts = mean(Points)) %>% as.numeric
 rookie_te
 rookie_te / 16
 with(tes, tapply(Points, Year, mean))
-```
 
 ### Change Over Time
-```{r}
 ppy <- with(tes, tapply(Points, Year, mean))
 year <- 2000:2019
 plot(ppy ~ year,
@@ -682,15 +581,11 @@ plot(ppy ~ year,
 te_yr_lm <- lm(ppy ~ year)
 summary(te_yr_lm)
 abline(te_yr_lm, col = "purple")
-```
 
 # Predictions
-```{r}
-combine2020 <- read.csv("2020combine.csv")
-```
+combine2020 <- read.csv("../data/2020combine.csv")
 
 ## Quarterbacks
-```{r}
 qbs_2020 <- filter(combine2020, Pos == "QB")
 final_qb_model
 qb_predictions <- predict(final_qb_model,
@@ -699,10 +594,8 @@ qb_predictions <- predict(final_qb_model,
 qb_predictions <- exp(qb_predictions)
 names(qb_predictions) <- qbs_2020$Player
 sort(qb_predictions, decreasing = TRUE, na.last = TRUE)
-```
 
 ## Running Backs
-```{r}
 rbs_2020 <- filter(combine2020, Pos == "RB")
 final_rb_model
 rb_predictions <- predict(final_rb_model,
@@ -711,10 +604,8 @@ rb_predictions <- predict(final_rb_model,
 rb_predictions <- exp(rb_predictions)
 names(rb_predictions) <- rbs_2020$Player
 sort(rb_predictions, decreasing = TRUE, na.last = TRUE)
-```
 
 ## Wide Receivers
-```{r}
 wrs_2020 <- filter(combine2020, Pos == "WR")
 final_wr_model
 wr_predictions <- predict(final_wr_model,
@@ -722,10 +613,8 @@ wr_predictions <- predict(final_wr_model,
 wr_predictions <- exp(wr_predictions)
 names(wr_predictions) <- wrs_2020$Player
 sort(wr_predictions, decreasing = TRUE, na.last = TRUE)
-```
 
 ## Tight Ends
-```{r}
 tes_2020 <- filter(combine2020, Pos == "TE")
 final_te_model
 te_predictions <- predict(final_te_model,
@@ -734,12 +623,10 @@ te_predictions <- predict(final_te_model,
 te_predictions <- (te_predictions)^3
 names(te_predictions) <- tes_2020$Player
 sort(te_predictions, decreasing = TRUE, na.last = TRUE)
-```
 
 
 # Wonderlic Scores
-```{r}
-wonderlic <- read.csv("Wonderlic Scores - Sheet1.csv", stringsAsFactors = FALSE)
+wonderlic <- read.csv("../data/Wonderlic Scores - Sheet1.csv", stringsAsFactors = FALSE)
 qb_wonder <- wonderlic %>% filter(Position == "QB")
 qbs <- qbs[qbs$Player %in% qb_wonder$Player, ]
 qb_wonder <- qb_wonder[qb_wonder$Player %in% qbs$Player, ]
@@ -766,5 +653,3 @@ legend("topright",
        col = "red", lty = 1,
        cex = 0.6)
 summary(fantasy_wonderlic)
-```
-
